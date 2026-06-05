@@ -15,7 +15,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-PKL_PATH = os.path.join(os.path.dirname(__file__), 'best_model_pipeline_thr040.pkl')
+PKL_PATH = os.path.join(os.path.dirname(__file__), 'ckd_pipeline.pkl')
+THRESHOLD = 0.40
 
 if not os.path.exists(PKL_PATH):
     st.error(f"找不到模型檔案：{PKL_PATH}")
@@ -140,9 +141,9 @@ with result_col:
 
         try:
             input_df = pd.DataFrame([input_dict])[features]
-            pred     = pipeline.predict(input_df)[0]
-            proba    = pipeline.predict_proba(input_df)[0]
+            proba        = pipeline.predict_proba(input_df)[0]
             prob_decline = proba[1]
+            pred         = 1 if prob_decline >= THRESHOLD else 0
 
             if pred == 1:
                 st.error(f"**High Risk — eGFR 下降 >7.5% 風險偏高**　（機率 {prob_decline*100:.1f}%）")
