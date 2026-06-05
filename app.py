@@ -22,7 +22,17 @@ if not os.path.exists(PKL_PATH):
     st.error(f"找不到模型檔案：{PKL_PATH}")
     st.stop()
 
-pipeline = joblib.load(PKL_PATH)
+try:
+    import sklearn, numpy
+    st.sidebar.caption(f"sklearn {sklearn.__version__} | numpy {numpy.__version__}")
+    pipeline = joblib.load(PKL_PATH)
+except ModuleNotFoundError as e:
+    st.error(f"缺少模組：**{e.name}** — {e}")
+    st.stop()
+except Exception as e:
+    st.error(f"載入失敗：{type(e).__name__}: {e}")
+    st.stop()
+
 features = list(pipeline.feature_names_in_)
 
 # ── Header ──
