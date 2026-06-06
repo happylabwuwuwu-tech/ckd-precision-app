@@ -492,9 +492,9 @@ if st.session_state.view == "patient" and st.session_state.result is not None:
         """, unsafe_allow_html=True)
 
         for icon, title, detail in content["body"]:
-            with st.expander(f"{icon}  {title}"):
+            with st.expander(title):
                 st.markdown(
-                    f"<div style='font-size:13px;color:#82999E;line-height:1.8;padding:2px 0'>{detail}</div>",
+                    f"<div style='font-size:13px;color:#82999E;line-height:1.8;padding:2px 0'>{icon} &nbsp; {detail}</div>",
                     unsafe_allow_html=True
                 )
 
