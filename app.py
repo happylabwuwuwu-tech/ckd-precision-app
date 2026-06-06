@@ -491,12 +491,18 @@ if st.session_state.view == "patient" and st.session_state.result is not None:
           </div>
         """, unsafe_allow_html=True)
 
+        rows_html = ""
         for icon, title, detail in content["body"]:
-            with st.expander(title):
-                st.markdown(
-                    f"<div style='font-size:13px;color:#82999E;line-height:1.8;padding:2px 0'>{icon} &nbsp; {detail}</div>",
-                    unsafe_allow_html=True
-                )
+            rows_html += f"""
+            <details style="border:1px solid #1D3940;border-radius:4px;margin-bottom:6px;background:#0B1B20;">
+              <summary style="padding:10px 14px;cursor:pointer;font-size:13px;color:#F3F8F7;list-style:none;display:flex;align-items:center;gap:8px;">
+                <span>{icon}</span><span>{title}</span>
+              </summary>
+              <div style="padding:10px 14px 12px;font-size:13px;color:#82999E;line-height:1.8;border-top:1px solid #1D3940;">
+                {detail}
+              </div>
+            </details>"""
+        st.markdown(rows_html, unsafe_allow_html=True)
 
         st.markdown("</div>", unsafe_allow_html=True)
 
