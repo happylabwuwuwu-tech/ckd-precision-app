@@ -394,7 +394,9 @@ if st.session_state.view == "patient" and st.session_state.result is not None:
 
     # ── Education Block (Patient View) ──────────────────────────────────────
     def get_ckd_stage(egfr):
-        if egfr >= 45:   return "G3a"
+        if egfr >= 90:   return "G1"
+        elif egfr >= 60: return "G2"
+        elif egfr >= 45: return "G3a"
         elif egfr >= 30: return "G3b"
         elif egfr >= 15: return "G4"
         else:            return "G5"
@@ -476,6 +478,26 @@ if st.session_state.view == "patient" and st.session_state.result is not None:
     }
 
     content = edu_data.get((ckd_stage, is_high))
+
+    # Fallback: 對於未收錄的分期（G1/G2/G5）或組合，顯示通用衛教而非靜默消失
+    if content is None:
+        stage_range = {
+            "G1": "G1  ·  eGFR ≥ 90", "G2": "G2  ·  eGFR 60–89",
+            "G3a": "G3a  ·  eGFR 45–59", "G3b": "G3b  ·  eGFR 30–44",
+            "G4": "G4  ·  eGFR 15–29", "G5": "G5  ·  eGFR < 15",
+        }
+        content = {
+            "stage_label": stage_range.get(ckd_stage, ckd_stage),
+            "headline": ("模型預測腎功能可能持續下降，請儘快與醫師討論後續管理計畫"
+                         if is_high else
+                         "目前腎功能風險較低，維持良好生活與用藥習慣並定期追蹤"),
+            "body": [
+                ("🩺", "與醫師討論", "本分期尚無專屬衛教清單，請攜此結果回診，由醫師依完整病史提供個別建議。"),
+                ("🧂", "飲食",       "維持低鹽、均衡飲食；蛋白質攝取請依醫師或營養師指示。"),
+                ("💊", "用藥",       "避免自行使用止痛藥（NSAIDs）及來路不明保健品；用藥調整請諮詢醫師。"),
+                ("📅", "定期追蹤",   "依醫囑定期檢查 eGFR 與尿蛋白；出現水腫、食慾不振、尿量改變請提早就醫。"),
+            ],
+        }
 
     if content:
         st.markdown(f"""
@@ -576,7 +598,7 @@ with left_col:
     for i, (key, label) in enumerate(lab_fields):
         row = lab_row1 if i < 5 else lab_row2
         with row[i % 5 if i < 5 else i - 5]:
-            lab_values[key] = st.number_input(label, value=20.0, format="%.1f", key=key, min_value=0.0, on_change=mark_outdated)
+            lab_values[key] = st.number_input(label, value=None, format="%.1f", key=key, min_value=0.0, placeholder="必填", on_change=mark_outdated)
 
     st.markdown("</div></div>", unsafe_allow_html=True)
 
@@ -673,42 +695,46 @@ with right_col:
     st.markdown("</div></div>", unsafe_allow_html=True)
 
     if run_btn:
-        st.session_state.outdated = False
-        input_dict = {
-            "crage": crage, "male": male,
-            "baseline_egfr": baseline_egfr,
-            "nHBA1C": nHBA1C, "nGLU": nGLU,
-            "nUPCR": nUPCR, "cciscore": cciscore,
-            "traj2": traj2, "traj3": traj3, "traj4": traj4,
-            **lab_values, **comorbidity_values, **medication_values,
-        }
-        try:
-            input_df = pd.DataFrame([input_dict])[features]
-            proba = pipeline.predict_proba(input_df)[0]
-            prob_decline = float(proba[1])
-            pred = 1 if prob_decline >= THRESHOLD else 0
-
-            active_com = [label for (key, label) in comorbidity_fields if comorbidity_values.get(key, 0) == 1]
-            active_med = [label for (key, label) in medication_fields if medication_values.get(key, 0) == 1]
-
-            st.session_state.result = {
-                "prob_decline": prob_decline,
-                "prob_no_decline": float(proba[0]),
-                "pred": pred,
-                "patient_id": patient_id,
+        missing_labs = [label for (key, label) in lab_fields if lab_values.get(key) is None]
+        if missing_labs:
+            st.error("請填寫以下檢驗值後再執行預測：" + "、".join(missing_labs))
+        else:
+            st.session_state.outdated = False
+            input_dict = {
+                "crage": crage, "male": male,
                 "baseline_egfr": baseline_egfr,
-                "nHBA1C": nHBA1C,
-                "nUPCR": nUPCR,
-                "cciscore": cciscore,
-                "crage": crage,
-                "male": male,
-                "traj": selected_traj,
-                "active_comorbidities": active_com,
-                "active_medications": active_med,
+                "nHBA1C": nHBA1C, "nGLU": nGLU,
+                "nUPCR": nUPCR, "cciscore": cciscore,
+                "traj2": traj2, "traj3": traj3, "traj4": traj4,
+                **lab_values, **comorbidity_values, **medication_values,
             }
-            st.rerun()
-        except Exception as e:
-            st.error(f"預測錯誤：{e}")
+            try:
+                input_df = pd.DataFrame([input_dict])[features]
+                proba = pipeline.predict_proba(input_df)[0]
+                prob_decline = float(proba[1])
+                pred = 1 if prob_decline >= THRESHOLD else 0
+
+                active_com = [label for (key, label) in comorbidity_fields if comorbidity_values.get(key, 0) == 1]
+                active_med = [label for (key, label) in medication_fields if medication_values.get(key, 0) == 1]
+
+                st.session_state.result = {
+                    "prob_decline": prob_decline,
+                    "prob_no_decline": float(proba[0]),
+                    "pred": pred,
+                    "patient_id": patient_id,
+                    "baseline_egfr": baseline_egfr,
+                    "nHBA1C": nHBA1C,
+                    "nUPCR": nUPCR,
+                    "cciscore": cciscore,
+                    "crage": crage,
+                    "male": male,
+                    "traj": selected_traj,
+                    "active_comorbidities": active_com,
+                    "active_medications": active_med,
+                }
+                st.rerun()
+            except Exception as e:
+                st.error(f"預測錯誤：{e}")
 
     # Result display
     if st.session_state.result is not None:
