@@ -53,6 +53,29 @@ def test_prediction_runs_once_labs_are_filled():
     assert 0.0 <= res["prob_decline"] <= 1.0
 
 
+def test_frequency_grid_hidden_pending_calibration():
+    """The 100-dot "about X in 100 similar patients" grid is a calibration
+    claim; AUROC does not establish it and no calibration evidence exists yet
+    (model_card.md §5). It must stay hidden — while the headline percentage
+    and education still render.
+    """
+    at = _fresh()
+    _fill_labs_and_egfr(at, 60.0)
+    at.button[0].click().run()
+    pv = [b for b in at.button if b.label == "Patient View"]
+    assert pv, "Patient View button missing"
+    pv[0].click().run()
+    assert not at.exception, at.exception
+    md = " ".join(m.value for m in at.markdown)
+    # match rendered markup, not the class names in the injected <style> block
+    assert 'class="freq-dot' not in md, "dot grid rendered despite SHOW_FREQUENCY_GRID=False"
+    assert 'class="freq-grid' not in md, "frequency grid container rendered"
+    assert "每 100 位" not in md, "frequency claim text still rendered"
+    # the rest of the patient view must survive the hide
+    assert 'class="pv-pct' in md, "headline percentage disappeared"
+    assert "衛教" in md, "education block disappeared"
+
+
 @pytest.mark.parametrize("egfr,stage", [(90.0, "G1"), (75.0, "G2"), (10.0, "G5")])
 def test_education_block_renders_for_uncatalogued_stages(egfr, stage):
     """G1/G2/G5 have no explicit edu entry; the fallback must still render."""

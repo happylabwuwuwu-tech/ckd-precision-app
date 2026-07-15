@@ -15,6 +15,12 @@ with open(_CSS_PATH, encoding="utf-8") as _f:
 PKL_PATH = os.path.join(os.path.dirname(__file__), 'ckd_pipeline.pkl')
 THRESHOLD = 0.40
 
+# The 100-dot grid states "about X in 100 similar patients will decline" — a
+# frequency claim that only holds if the model is calibrated. AUROC measures
+# ranking, not calibration, and no calibration evidence exists yet
+# (model_card.md §5). Hidden until that evidence lands; flip back to True then.
+SHOW_FREQUENCY_GRID = False
+
 if not os.path.exists(PKL_PATH):
     st.error(f"找不到模型檔案：{PKL_PATH}")
     st.stop()
@@ -102,21 +108,25 @@ if st.session_state.view == "patient" and st.session_state.result is not None:
       </div>
     """, unsafe_allow_html=True)
 
-    # 100-person frequency icon
-    filled = pct_int
-    dots_html = '<div class="freq-grid">'
-    for i in range(100):
-        cls = f"filled {risk_cls}" if i < filled else "empty"
-        dots_html += f'<div class="freq-dot {cls}" title="{i+1}"></div>'
-    dots_html += "</div>"
-    st.markdown(dots_html, unsafe_allow_html=True)
+    # 100-person frequency icon — see SHOW_FREQUENCY_GRID
+    if SHOW_FREQUENCY_GRID:
+        filled = pct_int
+        dots_html = '<div class="freq-grid">'
+        for i in range(100):
+            cls = f"filled {risk_cls}" if i < filled else "empty"
+            dots_html += f'<div class="freq-dot {cls}" title="{i+1}"></div>'
+        dots_html += "</div>"
+        st.markdown(dots_html, unsafe_allow_html=True)
 
-    st.markdown(f"""
-      <div style="font-size:12px;color:#82999E;">
-        每 100 位與您臨床特徵相似的患者中，約 <strong style="color:#F3F8F7">{filled}</strong> 位在追蹤期間可能發生顯著 eGFR 下降。
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown(f"""
+          <div style="font-size:12px;color:#82999E;">
+            每 100 位與您臨床特徵相似的患者中，約 <strong style="color:#F3F8F7">{filled}</strong> 位在追蹤期間可能發生顯著 eGFR 下降。
+          </div>
+        """, unsafe_allow_html=True)
+
+    # closes .pv-card opened above (kept outside the flag — the card must close
+    # whether or not the frequency block renders)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Key inputs summary
     st.markdown("""
