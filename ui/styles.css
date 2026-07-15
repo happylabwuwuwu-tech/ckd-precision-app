@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Reset & Base ── */
+#MainMenu, footer, header { visibility: hidden; }
+.block-container { padding: 1.5rem 2rem 3rem !important; max-width: 100% !important; }
+html, body, [class*="st-"] { font-family: 'IBM Plex Sans', sans-serif !important; }
+
+/* ── Palette variables ── */
+:root {
+  --bg:        #071115;
+  --card:      #0B1B20;
+  --card2:     #0F2229;
+  --border:    #1D3940;
+  --border2:   #274D58;
+  --primary:   #5AD1BD;
+  --primary-d: #3DAE9B;
+  --warn:      #F1C96A;
+  --warn-d:    #D99A3A;
+  --danger:    #E8715A;
+  --txt:       #F3F8F7;
+  --txt2:      #82999E;
+  --txt3:      #4A6B72;
+  --mono:      'IBM Plex Mono', monospace;
+}
+
+/* ── Streamlit overrides ── */
+.stApp { background: var(--bg) !important; }
+.stApp > div { background: var(--bg) !important; }
+section[data-testid="stSidebar"] { background: var(--card) !important; border-right: 1px solid var(--border) !important; }
+
+/* numbers/inputs */
+input[type="number"], input[type="text"] {
+  background: var(--card2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--txt) !important;
+  border-radius: 4px !important;
+  font-family: var(--mono) !important;
+  font-size: 14px !important;
+}
+input[type="number"]:focus, input[type="text"]:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+label { color: var(--txt2) !important; font-size: 12px !important; letter-spacing: 0.05em !important; text-transform: uppercase !important; }
+.stNumberInput > div > div > div > button {
+  background: var(--card2) !important;
+  border-color: var(--border) !important;
+  color: var(--txt2) !important;
+}
+
+/* radio */
+.stRadio > div { gap: 6px !important; }
+.stRadio label { text-transform: none !important; font-size: 13px !important; color: var(--txt) !important; }
+.stRadio [data-testid="stMarkdownContainer"] p { color: var(--txt2) !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; margin-bottom: 6px !important; }
+
+/* checkboxes */
+.stCheckbox label { text-transform: none !important; font-size: 13px !important; color: var(--txt) !important; letter-spacing: 0 !important; }
+.stCheckbox [data-baseweb="checkbox"] div { border-color: var(--border2) !important; background: var(--card2) !important; border-radius: 3px !important; }
+.stCheckbox [data-baseweb="checkbox"][aria-checked="true"] div { background: var(--primary) !important; border-color: var(--primary) !important; }
+
+/* button */
+.stButton > button {
+  background: var(--primary) !important;
+  color: #071115 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-family: var(--mono) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em !important;
+  padding: 10px 24px !important;
+  transition: background 0.15s !important;
+}
+.stButton > button:hover { background: var(--primary-d) !important; }
+.stButton > button[kind="secondary"] {
+  background: var(--card2) !important;
+  color: var(--txt2) !important;
+  border: 1px solid var(--border) !important;
+}
+.stButton > button[kind="secondary"]:hover { border-color: var(--primary) !important; color: var(--primary) !important; }
+
+/* metric */
+[data-testid="stMetric"] { background: var(--card2) !important; border: 1px solid var(--border) !important; border-radius: 4px !important; padding: 12px 16px !important; }
+[data-testid="stMetricLabel"] { color: var(--txt2) !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }
+[data-testid="stMetricValue"] { color: var(--txt) !important; font-family: var(--mono) !important; font-size: 22px !important; }
+
+/* progress */
+.stProgress > div > div { background: var(--border) !important; border-radius: 2px !important; height: 6px !important; }
+.stProgress > div > div > div { border-radius: 2px !important; }
+
+/* alerts */
+.stAlert { border-radius: 4px !important; border-width: 1px !important; }
+[data-testid="stNotification"] { background: var(--card) !important; }
+
+/* caption */
+.stCaption { color: var(--txt3) !important; font-size: 11px !important; }
+
+/* divider */
+hr { border-color: var(--border) !important; margin: 0 !important; }
+
+/* selectbox */
+.stSelectbox > div > div { background: var(--card2) !important; border-color: var(--border) !important; color: var(--txt) !important; border-radius: 4px !important; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── Custom components ── */
+.ckd-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px; margin-bottom: 20px;
+}
+.ckd-header-left h1 {
+  font-family: var(--mono); font-size: 20px; font-weight: 600;
+  color: var(--txt); letter-spacing: -0.02em; margin: 0 0 4px;
+}
+.ckd-header-left h1 span { color: var(--primary); }
+.ckd-header-left p { color: var(--txt2); font-size: 12px; margin: 0; }
+.ckd-meta {
+  display: flex; gap: 16px; align-items: center;
+}
+.ckd-meta-item {
+  text-align: right;
+}
+.ckd-meta-item .val { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--primary); }
+.ckd-meta-item .lbl { font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.section-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.section-title {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 600;
+  color: var(--txt2);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.section-title .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--primary); flex-shrink: 0;
+}
+.section-body { padding: 16px; }
+
+.risk-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+}
+.risk-card.high { border-color: var(--warn); }
+.risk-card.low  { border-color: var(--primary); }
+
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px;
+  margin-bottom: 12px;
+}
+.risk-badge.high { background: rgba(241,201,106,0.15); color: var(--warn); border: 1px solid rgba(241,201,106,0.3); }
+.risk-badge.low  { background: rgba(90,209,189,0.12); color: var(--primary); border: 1px solid rgba(90,209,189,0.25); }
+
+.risk-pct {
+  font-family: var(--mono); font-size: 52px; font-weight: 600;
+  line-height: 1; letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.risk-pct.high { color: var(--warn); }
+.risk-pct.low  { color: var(--primary); }
+.risk-sublabel { font-size: 12px; color: var(--txt2); margin-bottom: 16px; }
+
+.traj-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.outdated-banner {
+  background: rgba(217,154,58,0.1);
+  border: 1px solid rgba(217,154,58,0.3);
+  border-radius: 4px;
+  padding: 8px 14px;
+  color: var(--warn-d);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+/* Patient view */
+.pv-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 12px;
+}
+.pv-pct {
+  font-family: var(--mono); font-size: 72px; font-weight: 600;
+  line-height: 1; letter-spacing: -0.03em; margin: 8px 0 4px;
+}
+.pv-pct.high { color: var(--warn); }
+.pv-pct.low  { color: var(--primary); }
+.freq-grid { display: flex; flex-wrap: wrap; gap: 3px; margin: 12px 0; }
+.freq-dot { width: 14px; height: 14px; border-radius: 2px; }
+.freq-dot.filled.high { background: var(--warn); }
+.freq-dot.filled.low  { background: var(--primary); }
+.freq-dot.empty { background: var(--border); }
+
+.disclaimer {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--txt3);
+  border-radius: 0 4px 4px 0;
+  padding: 10px 14px;
+  font-size: 12px; color: var(--txt3);
+  margin-top: 16px;
+}
